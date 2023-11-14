@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+//3. 编写函数从文件读入所有学生信息
 //表示学生信息的结构
 struct student {
     char name[100];
@@ -33,6 +34,8 @@ int ReadStudentInfo(const char* filename,struct student**pStudent){
     //QAQ怎么分配啊，指针玩不明白了
     //ps：没有验证分配失败（所以会不会失败）
     struct student ** pStudents = (struct student **)malloc (numStudents * sizeof(struct student*));
+    //当使用malloc分配内存时，返回的是一个指向分配内存起始位置的指针
+    //注意，这里pStudents已经创建了
 
     //还要分配内存？(但明显，这里指针都退了一格)
     // struct student pStudent[numStudents];
@@ -41,6 +44,8 @@ int ReadStudentInfo(const char* filename,struct student**pStudent){
     for (int i = 0;i < numStudents; i++){
         pStudents[i] = (struct student*)malloc(sizeof(struct student));
     }
+    //指针基础：p[i]=*(p+i)=a[?+i]
+    //em静态内存分配和动态内存分配真有意思
 
     //内存分配完毕，定位文件头并写入结构体数组
     fseek(file, 0, SEEK_SET);
@@ -50,6 +55,7 @@ int ReadStudentInfo(const char* filename,struct student**pStudent){
         sscanf(buffer, "%s %d %d", (*pStudent)[numStudents].name, & (*pStudent)[numStudents].stuNum, & (*pStudent)[numStudents].expGrade);
         numStudents++;
     }
+    //(*pStudent)也可以写作pStudent->
 
     // //释放内存
     // for ( i=0 ;i < numStudents; i++ ){
@@ -64,41 +70,43 @@ int ReadStudentInfo(const char* filename,struct student**pStudent){
     return numStudents;
 }
 //---------------------------------------------------------------------------------------------------
-//这是测试一下内存分配和输入搞得怎么样，用个print试一下———好像有问题：出现异常。Segmentation fault。
-void printStudents(struct student* students, int numStudents) {
-    printf("Student Information:\n");
-    for (int i = 0; i < numStudents; i++) {
-        printf("Student %d\n", i + 1);
-        printf("Name: %s\n", students[i].name);
-        printf("Student Number: %s\n", students[i].stuNum);
-        printf("Examination Grade: %d\n", students[i].expGrade);
-        printf("Half Grade: %d\n", students[i].halfGrade);
-        printf("Grade: %d\n", students[i].Grade);
-        printf("\n");
+
+//4. 编写统计函数
+//两个任务：1是算出一个学生的总成绩并扔回到结构体中；2是算出一个班的平均成绩
+float Count (struct student pStu[],int num){
+    float advGrades;
+    int allsum = 0,advgrades=0;
+    for (int i = 0; i < num; i++){
+        pStu[i].Grade += pStu[i].expGrade + pStu[i].halfGrade;
+        allsum += pStu[i].Grade;
     }
+    advgrades = allsum / num;
+    //等一等 还要保留一位小数
+    return advgrades;
 }
 
-int main() {
-    int i;
-    const char* filename = "test.txt"; // 更改为你的文件名
-    struct student* students = NULL;
-    int numStudents = ReadStudentInfo(filename, &students);
-    
-    if (numStudents == -1) {
-        printf("Failed to open the file.\n");
-        return -1;
+//5. 编写成绩整理函数
+
+//6. 编写输出函数
+void printfunc(){
+    //自己写
+}
+
+//7. 编写 main 函数实现：
+int main(){
+    int i , numStudents;
+    numStudents =ReadStudentInfo(const char* filename,struct student**pStudent);
+    //还没填
+    //嗯？输入在函数里。。那我怎么声明
+
+    //释放内存
+    for ( i=0 ;i < numStudents; i++ ){
+        free(pStudents[i]);
     }
-
-    printStudents(students, numStudents);
-
-        //释放内存
-    free(students);
-
-    return 0;
 }
 
 /*
-如何让gpt指出错误：
+如何让gpt指出错误(模板)：
 
 是我哪里有错列出来这一段，然后给改进
 比如,你指出（用你一般用的code黑框表示）      
